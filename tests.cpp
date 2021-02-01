@@ -41,7 +41,6 @@ bool EFH_high_line()  // should not error out
         n_lines += 1;
     }
     string output = executeFromHistory(n_lines + 5).input;
-    cout << output.size() << "," << output;
     if (!output.size()) {  // if empty. TODO: discuss with Dinesh what output needs to be
         return true;
     }
@@ -67,11 +66,39 @@ bool EFH_neg_line()
     return true;
 }
 
+bool LH_default()
+{
+    int n = readNumberOfLines();
+    logHandler("ls -a\n");
+    string logged = executeFromHistory(n + 1).input;
+    if (!logged.compare("ls -a\n")) {
+        return true;
+    }
+    return false;
+}
+
+bool RNL_default()
+{
+    std::ifstream file("./osshell_history");
+    vector<string> CPP_strings{};
+    string temp;
+    while (std::getline(file, temp)) {
+        CPP_strings.push_back(temp);
+    }
+    if (readNumberOfLines() == CPP_strings.size()) {
+        return true;
+    }
+
+    return false;
+}
+
 int main()
 {
-    vector<std::pair<string, bool>> test_descr{{"EFH expected behaviour:\t", EFH_default_test()},
-                                               {"EFH when n > total lines:\t", EFH_high_line()},
-                                               {"EFH when n < 0:\t", EFH_neg_line()}};
+    vector<std::pair<string, bool>> test_descr{{"EFH expected behaviour:\t\t", EFH_default_test()},
+                                               {"EFH when n > n_lines:\t\t", EFH_high_line()},
+                                               {"EFH when n < 0:\t\t\t", EFH_neg_line()},
+                                               {"LogHandler appends right: \t", LH_default()},
+                                               {"ReadNlines works correctly: \t", RNL_default()}};
     for (const auto& test : test_descr) {
         std::cout << test.first;
         if (test.second) {

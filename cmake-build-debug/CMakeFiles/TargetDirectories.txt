@@ -1,3 +1,0 @@
-/home/MassiveAtoms/Desktop/os_shell_project/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/MassiveAtoms/Desktop/os_shell_project/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/MassiveAtoms/Desktop/os_shell_project/cmake-build-debug/CMakeFiles/osshell.dir

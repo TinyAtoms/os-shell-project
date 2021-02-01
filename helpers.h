@@ -24,7 +24,6 @@ struct Command {  // funct not allowed to return char* [], that's why there's th
 Command get_command();                       // read command from consoles & check for special characters
 Command executeFromHistory(int lineNumber);  // execute previously used command
 int logHandler(char appndLn[]);              // save to file
-void appendLine(char putLine[]);             // save to file, but probably deprecated
 int readNumberOfLines();                     // return number of lines in histfile
 
 /*
@@ -103,11 +102,6 @@ Command get_command()
  * Executes the command that ran linenumber times ago
  * @param: int LineNumber is the line# we want to execute????
  * @return: Command object that nearly ready to pass on to execvp
- *TODO: ? in bash en zsh, als lN > total lines, dan geeft het een error
- * bash: !700: event not found
- * zsh: no such event: 700
- * mischien lege command returnen in this case, en waar dit geinvoked wordt,
- * checken ervoor en zoiets printen?
  */
 Command executeFromHistory(int lineNumber)
 {
@@ -162,17 +156,5 @@ int readNumberOfLines()
     }
     return lines;
 }
-
-/*
- * Appends line to historyfile
- * @params: char appndLn[] the line that needs to be appended
- * @return: void nothing
- */
-// void appendLine(char appndLn[])  // TODO: determine if deprecated?
-// {
-//     FILE* fp = fopen("./osshell_history", "a");
-//     auto b = fputs(appndLn, fp);
-//     fclose(fp);
-// }
 
 #endif  // OS_PROJ_HELPERS_H
