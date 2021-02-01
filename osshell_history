@@ -19,3 +19,48 @@ ls
 ls -a&
 ls -a
 ls&
+ls -a
+ls
+ping test
+ls
+ping google.com
+ls -a
+ls
+ls
+huh
+ls
+exit
+exit
+exit
+exit
+exit
+exit
+ls
+exit
+exit
+ls
+ls
+huh
+ls
+ls
+exit
+exit
+ls
+ls
+ls
+exit
+exit
+exit
+ls
+ls
+exit
+ls
+ls
+ls
+a
+exit
+exit
+ping google.com
+exit
+exit
+ping -c 5 google.com
