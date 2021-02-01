@@ -58,3 +58,9 @@ ls
 ls
 ls
 a
+exit
+exit
+ping google.com
+exit
+exit
+ping -c 5 google.com
