@@ -1,7 +1,9 @@
-ls -a
-ping google.com
-ls -a
-ls -a
-ls -a&
-ls -a
-ls -ao
+ping -c 1 google.com
+ping -c 2 google.com
+ping -c 3 google.com
+ping -c 4 google.com
+ping -c 5 google.com
+ping -c 6 google.com
+ping -c 7 google.com
+ping -c 8 google.com
+ping -c 9 google.com

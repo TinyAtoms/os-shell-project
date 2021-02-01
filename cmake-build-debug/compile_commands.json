@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/MassiveAtoms/Desktop/os_shell_project/cmake-build-debug",
+  "command": "/usr/bin/clang++    -O3 -flto=thin -march=native -g   -std=gnu++17 -o CMakeFiles/osshell.dir/main.cpp.o -c /home/MassiveAtoms/Desktop/os_shell_project/main.cpp",
+  "file": "/home/MassiveAtoms/Desktop/os_shell_project/main.cpp"
+}
+]
