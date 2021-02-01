@@ -5,33 +5,33 @@
 
 #include "./helpers.h"
 
+using std::cout;
 using std::string;
 using std::vector;
 
 // executeFromHistory tests ------------------------
-bool EFH_test()  // as mentioned in assignment
-{                // checks if output matches
+
+// checks default behaviour (0<n<total lines)
+bool EFH_default_test()
+{
     std::ifstream file("./osshell_history");
     vector<string> CPP_strings{""};
     string temp;
     while (std::getline(file, temp)) {
         CPP_strings.push_back(temp);
     }
-
     for (int i = 1; i < CPP_strings.size(); i++) {
-        CPP_strings[i] += "\n";
-        // string EFH_string = executeFromHistory(CPP_strings.size() - i + 1).input; // what is programmed in now
+        string expected = CPP_strings[i] + "\n";
         string EFH_string = executeFromHistory(i).input;  // what actually needs to happen tho
-        // std::cout << i << ":" << EFH_string; // TODO: remove
-        // std::cout << i << ":" << CPP_strings[i] << "\n";
-        if (CPP_strings[i].compare(EFH_string) != 0) {
+        if (expected.compare(EFH_string) != 0) {
             return false;
         }
     }
     return true;
 }
 
-bool EFH_high_line()
+// checks what happens for n > number of lines
+bool EFH_high_line()  // should not error out
 {
     std::ifstream file("./osshell_history");
     int n_lines = 1;
@@ -40,23 +40,45 @@ bool EFH_high_line()
         std::getline(file, temp);
         n_lines += 1;
     }
-    std::cout << executeFromHistory(n_lines + 2).input;
+    string output = executeFromHistory(n_lines + 5).input;
+    cout << output.size() << "," << output;
+    if (!output.size()) {  // if empty. TODO: discuss with Dinesh what output needs to be
+        return true;
+    }
+    return false;
+}
+// checks what happens if n < 0
+bool EFH_neg_line()
+{
+    std::ifstream file("./osshell_history");
+    vector<string> CPP_strings{""};
+    string temp;
+    while (std::getline(file, temp)) {
+        CPP_strings.push_back(temp);
+    }
+    int size = CPP_strings.size();
+    for (int i = 1; i < size; i++) {
+        string expected = CPP_strings[size - i];
+        string EFH_string = executeFromHistory(-1 * i).input;
+        if (!expected.compare(EFH_string)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 int main()
 {
-    vector<std::pair<string, bool>> test_descr
-    {
-        {"execFromHist expected behaviour:\t", EFH_test()}, 
-        { "execFromHist when n > total lines:\t", EFH_high_line() }
-    };
+    vector<std::pair<string, bool>> test_descr{{"EFH expected behaviour:\t", EFH_default_test()},
+                                               {"EFH when n > total lines:\t", EFH_high_line()},
+                                               {"EFH when n < 0:\t", EFH_neg_line()}};
     for (const auto& test : test_descr) {
         std::cout << test.first;
         if (test.second) {
             std::cout << "passed\n";
         }
         else {
-            std::cout << "FAILED!!";
+            std::cout << "FAILED!!\n";
         }
     }
 }

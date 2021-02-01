@@ -9,21 +9,23 @@
 #include <string.h>  // for all those lovely string manipulation functions with weird names
 #include <unistd.h>  // for execvp
 
+#include <cstdlib>
+
 const int MAXLEN = 80;
 
 struct Command {  // funct not allowed to return char* [], that's why there's this
-    char input[MAXLEN];
+    char input[MAXLEN] = "";
     char* args[MAXLEN];
-    bool background;
-    bool nonempty;  // execvp doesn't like it when you give empty args, easy way to check for it
+    bool background = false;
+    bool nonempty = false;  // execvp doesn't like it when you give empty args, easy way to check for it
 };
 
 // function declarations
 Command get_command();                       // read command from consoles & check for special characters
 Command executeFromHistory(int lineNumber);  // execute previously used command
-void logHandler(char appndLn[]);
-void appendLine(char putLine[]);
-int readNumberOfLines();
+int logHandler(char appndLn[]);              // save to file
+void appendLine(char putLine[]);             // save to file, but probably deprecated
+int readNumberOfLines();                     // return number of lines in histfile
 
 /*
  * This captures input from stdin, execute past command if it is (!n, !),
@@ -42,27 +44,38 @@ Command get_command()
         c.nonempty = false;
         return c;
     }
+    else if (c.input[0] == '!') {  // handle ! cases
+        char temp[100];
+        memcpy(temp, &c.input[1], strlen(c.input));
+        temp[strlen(c.input)] = '\0';
+        int n_line = atoi(temp);
+        if (!n_line) {  // atoi("something that's not a number") returns 0
+            printf("invalid use of !history. use !<nonzero number>");
+            c.args[0] = NULL;
+            c.background = false;
+            c.nonempty = false;
+            return c;
+        }
+        else if (n_line > readNumberOfLines()) {  // if n > maxlines
+            printf("osshell: no such event: ");
+            printf("%s", temp);
+            c.args[0] = NULL;
+            c.background = false;
+            c.nonempty = false;
+            return c;
+        }
+        else {
+            c = executeFromHistory(n_line);
+            printf("%s", c.input);
+            fflush(stdin);
+        }
+    }
+    else if (c.input == "history\n") {  // handle history command
+        // we could loop readnumberoflines times, and cout << i, execFH(i)
+        // or do a dedicated function
+        // because it'd be a wasteful 10x looping over the file to the end
+    }
 
-    // check for ! & !N
-    // uitzonderingstoestanden voor ! en !10
-    if (c.input[0] == '!' && c.input[1] == '\n') {
-        c = executeFromHistory(1);
-        printf("%s\n", c.input);  // print used command
-        fflush(stdin);            // delete comment in case SegFault
-    }
-    else if (c.input[0] == '!' && (48 < c.input[1] <= 57) && c.input[2] == '\n') {
-        // BUG: (48<c.input[1]<=57) is always true . Do you mean (c.input[1] > 48 && c.input[1] < 57)?
-        // you could probably just take everything between [0:size] and convert it to int with stoi/strtoi
-        // and then pass it to execFromHistory
-        // tht way, you don't have to handle 1-9 and 10 seperately, and we can go > !10
-        c = executeFromHistory(c.input[1] - 48);
-    }
-    else if (c.input[0] == '!' && c.input[1] == '1' && c.input[2] == '0') {
-        c = executeFromHistory(10);
-    }
-    else {
-        ;
-    }
     c.nonempty = true;
     logHandler(c.input);
     c.input[strlen(c.input) - 1] = '\0';  // newline is captured too, need to remove
@@ -90,81 +103,50 @@ Command get_command()
  * Executes the command that ran linenumber times ago
  * @param: int LineNumber is the line# we want to execute????
  * @return: Command object that nearly ready to pass on to execvp
+ *TODO: ? in bash en zsh, als lN > total lines, dan geeft het een error
+ * bash: !700: event not found
+ * zsh: no such event: 700
+ * mischien lege command returnen in this case, en waar dit geinvoked wordt,
+ * checken ervoor en zoiets printen?
  */
 Command executeFromHistory(int lineNumber)
 {
-    int indexNum[] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
-    FILE* fp;
+    if (lineNumber < 0) {
+        lineNumber = readNumberOfLines() + lineNumber + 1;
+    }
     int count = 1;
-    lineNumber = indexNum[lineNumber - 1];  // telling omkeren van asc naar desc
-
     Command command;
-    fp = fopen("./osshell_history", "r");
-
-    while (fgets(command.input, 100, (FILE*)fp)) {  // read line from file
-
+    FILE* fp = fopen("./osshell_history", "r");
+    char temp[MAXLEN];
+    while (fgets(temp, MAXLEN, fp)) {  // read line from file
         if (count == lineNumber) {
-            fclose(fp);
-            return command;
+            strcpy(command.input, temp);
+            break;
         }
-        else {
-            count++;
-            if (count > 10) {
-                break;
-            }
-        }
+        count++;
     }
     fclose(fp);
     return command;
 }
+
 /* Adds command that's going to be run to history file
-* and maintains length of 10 for history file
-* @param: appndLn[] line that needs to be appended
-* @return: void
-*/
-void logHandler(char appndLn[])
+ * and maintains length of 10 for history file
+ * @param: line[] line that needs to be appended
+ * @return: void
+ */
+int logHandler(char line[])  // fixed it already
 {
-    char buffer;
-    FILE *fp, *fp1;
-    int lines = 0;
-    int lineCounter = 0;
-
-    fp = fopen("./osshell_history", "r");
-
-    fp1 = fopen("./TEMP", "w");
-    // buffer = getc(fp);
-    lines = readNumberOfLines();  // check file length to keep at 10 lines
-
-    while (lines < 10 && buffer != EOF) {  // EOF is endcriteria
-        buffer = getc(fp);
-        if (buffer != EOF) {  // voorkomen dat EOF geprint wordt
-            putc(buffer, fp1);
-        }
-    }
-
-    while (lines >= 10 && buffer != EOF) {
-        buffer = getc(fp);
-        if (lineCounter != 0 && buffer != EOF) {
-            putc(buffer, fp1);
-        }
-
-        if (buffer == '\n') {
-            lineCounter++;
-        }
-    }
-    fclose(fp);
-    fclose(fp1);
-
-    rename("./TEMP", "osshell_history");
-
-    appendLine(appndLn);
+    FILE* file = fopen("./osshell_history", "a");  // change to ~/oshell instead of ./
+    auto b = fputs(line, file);
+    fclose(file);
+    return b;
 }
 
 /*
-* Returns how many lines historyfile has
-* @params: void
-* @params: n lines of historyfile
-*/
+ * Returns how many lines historyfile has
+ * @params: void
+ * @params: n lines of historyfile
+ */
 int readNumberOfLines()
 {
     char buffer;
@@ -182,15 +164,15 @@ int readNumberOfLines()
 }
 
 /*
-* Appends line to historyfile
-* @params: char appndLn[] the line that needs to be appended
-* @return: void nothing
-*/
-void appendLine(char appndLn[])
-{
-    FILE* fp = fopen("./osshell_history", "a");
-    auto b = fputs(appndLn, fp);
-    fclose(fp);
-}
+ * Appends line to historyfile
+ * @params: char appndLn[] the line that needs to be appended
+ * @return: void nothing
+ */
+// void appendLine(char appndLn[])  // TODO: determine if deprecated?
+// {
+//     FILE* fp = fopen("./osshell_history", "a");
+//     auto b = fputs(appndLn, fp);
+//     fclose(fp);
+// }
 
 #endif  // OS_PROJ_HELPERS_H

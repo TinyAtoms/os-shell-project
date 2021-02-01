@@ -36,3 +36,7 @@ add_executable(tests
         ./helpers.h
 )
 
+add_executable(snippet_runner
+        ./snippet.cpp
+)
+

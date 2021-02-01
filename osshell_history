@@ -5,5 +5,20 @@ ping -c 4 google.com
 ping -c 5 google.com
 ping -c 6 google.com
 ping -c 7 google.com
-ping -c 8 google.com
-ping -c 9 google.com
+ls
+ls
+ping -c 1 google.com
+ping -c 1 google.com
+ping -c 1 google.com
+ping -c 1 google.com
+ls
+ping -c 5 google.com
+ping -c 5 google.com
+history
+ping -c 6 google.com
+history
+ls -a
+ping -c 4 google.com
+ping -c 4 google.com
+ping -c 4 google.com
+ls -a
