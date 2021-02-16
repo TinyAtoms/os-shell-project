@@ -5,11 +5,12 @@
 #ifndef OS_PROJ_HELPERS_H
 #define OS_PROJ_HELPERS_H
 
-#include <stdio.h>   // this will provide stdin for when iostream/cout get removed
+#include <stdio.h>   // this will provide stdin for printf
 #include <string.h>  // for all those lovely string manipulation functions with weird names
 #include <unistd.h>  // for execvp
 
 #include <cstdlib>
+
 
 const int MAXLEN = 80;
 
@@ -24,7 +25,8 @@ struct Command {  // funct not allowed to return char* [], that's why there's th
 Command get_command();                       // read command from consoles & check for special characters
 Command executeFromHistory(int lineNumber);  // execute previously used command
 int logHandler(char appndLn[]);              // save to file
-int readNumberOfLines();                     // return number of lines in histfile
+int readNumberOfLines();
+void display_history();  // return number of lines in histfile
 
 /*
  * This captures input from stdin, execute past command if it is (!n, !),
@@ -32,19 +34,32 @@ int readNumberOfLines();                     // return number of lines in histfi
  */
 Command get_command()
 {
+    /*
+    first, we'll check if you actually input anything before enter
+    then we'll handle !!
+    after that !n
+    after that, history
+    if it's none of those, we'll parse the input and transform it 
+    to a form that exevp takes
+    */
     Command c;
     printf("osh>");
     fgets(c.input, MAXLEN, stdin);
     fflush(stdin);
-
     if (strlen(c.input) == 1) {  // pressed enter without any text any text
         c.args[0] = NULL;
         c.background = false;
         c.nonempty = false;
         return c;
     }
+    else if (c.input[0] == '!' and c.input[1] == '!') { // case "!!"
+        int n_line = readNumberOfLines();
+        c = executeFromHistory(n_line);
+        printf("%s", c.input);
+        fflush(stdin);
+    }
     else if (c.input[0] == '!') {  // handle ! cases
-        char temp[100];
+        char temp[MAXLEN];
         memcpy(temp, &c.input[1], strlen(c.input));
         temp[strlen(c.input)] = '\0';
         int n_line = atoi(temp);
@@ -69,25 +84,8 @@ Command get_command()
             fflush(stdin);
         }
     }
-    else if (c.input == "history\n") {  // handle history command
-        // we could loop readnumberoflines times, and cout << i, execFH(i)
-        // or do a dedicated function
-        // because it'd be a wasteful 10x looping over the file to the end
-
-        char lines[6][256];
-        size_t i = 0;
-        FILE *myfile = fopen("./osshell_history", "r");
-        
-        while (fgets(lines[i % 11], sizeof(lines[i % 11]), myfile) != NULL) {
-            i++;
-        }
-            
-        fclose(myfile);
-            
-        for (size_t j = i < 10 ? 0 : i - 10; j < i; j++) {
-            fputs(lines[j % 11], stdout);
-        }
-
+    else if (!strcmp(c.input, "history\n")) {  // handle history command
+        display_history();
     }
 
     c.nonempty = true;
@@ -111,6 +109,19 @@ Command get_command()
         c.args[i - 1][strlen(last) - 1] = '\0';
     }
     return c;
+}
+
+/*
+ * displays last 10 commands
+ * takes no input
+ */
+void display_history()
+{
+    int n = readNumberOfLines();
+    for (int i = 0; i < 10; i++) {
+        Command x = executeFromHistory(n - i);
+        printf("%d\t%s", n - i, x.input);
+    }
 }
 
 /*

@@ -1,0 +1,4 @@
+demo the following abnormal cases
+enter without any command
+!n where n > total history
+!n where n is negative

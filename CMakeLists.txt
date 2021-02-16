@@ -27,7 +27,7 @@ set(CLANG_TIDY_SUPPRESS_CXX
 )
 
 add_executable(osshell
-                ./main.cpp
+        ./main.cpp
        helpers.h
         )
 
@@ -35,8 +35,3 @@ add_executable(tests
         ./tests.cpp
         ./helpers.h
 )
-
-add_executable(snippet_runner
-        ./snippet.cpp
-)
-
