@@ -7,11 +7,12 @@ Shell for OS class
 - [X] Write tests?
 - [X] check for !!, !n
 - [X] fork process if "&" is in the command
+- [X] handle history
   
   
 # TODO:
 - [ ] Do error handling
-- [ ] handle history
+- [ ] Index history
 - [ ] change cmake file to reflect the fact that i want C compiler, not CXX
 
 
