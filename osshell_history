@@ -6,18 +6,15 @@ ping -c 5 google.com
 ping -c 6 google.com
 ping -c 7 google.com
 ls -a
+exit
+ping -c 2 google.com
 ls
-history
-history
 ls -a
-ls -a
-ls /home
-exit
-history
-ls /home
-exit
-ls -a
-history
-exit
+ping -c 2 google.com
+ls&
 exit
 ping -c 5 google.com
+ls
+ls&
+ping -c 5 google.com
+exit

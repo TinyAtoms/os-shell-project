@@ -86,6 +86,10 @@ Command get_command()
     }
     else if (!strcmp(c.input, "history\n")) {  // handle history command
         display_history();
+            c.args[0] = NULL;
+            c.background = false;
+            c.nonempty = false;
+            return c;
     }
 
     c.nonempty = true;
