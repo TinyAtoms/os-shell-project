@@ -8,18 +8,18 @@
 #include <stdio.h>   // this will provide stdin for printf
 #include <string.h>  // for all those lovely string manipulation functions with weird names
 #include <unistd.h>  // for execvp
+#include <stdbool.h>
 
-#include <cstdlib>
 
 
 const int MAXLEN = 80;
 
-struct Command {  // funct not allowed to return char* [], that's why there's this
-    char input[MAXLEN] = "";
+typedef struct Command {  // funct not allowed to return char* [], that's why there's this
+    char input[MAXLEN];
     char* args[MAXLEN];
-    bool background = false;
-    bool nonempty = false;  // execvp doesn't like it when you give empty args, easy way to check for it
-};
+    bool background;
+    bool nonempty;  // execvp doesn't like it when you give empty args, easy way to check for it
+} Command;
 
 // function declarations
 Command get_command();                       // read command from consoles & check for special characters
@@ -52,7 +52,7 @@ Command get_command()
         c.nonempty = false;
         return c;
     }
-    else if (c.input[0] == '!' and c.input[1] == '!') { // case "!!"
+    else if (c.input[0] == '!' && c.input[1] == '!') { // case "!!"
         int n_line = readNumberOfLines();
         c = executeFromHistory(n_line);
         printf("%s", c.input);

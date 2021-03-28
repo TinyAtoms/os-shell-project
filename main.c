@@ -3,9 +3,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <cstring>
 #include "./helpers.h"
-#include <iostream>
 int main()
 {
         while (true) {
